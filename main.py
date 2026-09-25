@@ -6,40 +6,40 @@ from googletrans import Translator
 
 # Sık kullanılan dillerin eşleşme tablosu
 LANGUAGES = {
-    "1": ("de", "Almanca"),
-    "2": ("tr", "Türkçe"),
-    "3": ("en", "İngilizce"),
-    "4": ("fr", "Fransızca"),
-    "5": ("es", "İspanyolca"),
-    "6": ("it", "İtalyanca"),
-    "7": ("ru", "Rusça")
+    "1": ("de", "German"),
+    "2": ("tr", "Turkish"),
+    "3": ("en", "English"),
+    "4": ("fr", "French"),
+    "5": ("es", "Spanish"),
+    "6": ("it", "Italic"),
+    "7": ("ru", "Russian")
 }
 
 def get_target_language():
-    print("\n--- Hedef Dil Seçimi ---")
+    print("\n--- Main Language Choice ---")
     for key, (code, name) in LANGUAGES.items():
         print(f"{key}. {name} ({code})")
-    print("8. Diğer (Dil kodunu manuel girin - örn: ja, ko, ar)")
+    print("8. Diğer (Enter language code manually - örn: ja, ko, ar)")
     
-    choice = input("\nÇevirmek istediğiniz dilin numarasını girin: ").strip()
+    choice = input("\nEnter the number of the language you want to translate into: ").strip()
     
     if choice in LANGUAGES:
         return LANGUAGES[choice]
     elif choice == "8":
-        custom_code = input("Hedef dil kodunu girin (örn. 'ja' - Japonca): ").strip().lower()
+        custom_code = input("Enter the target language code (örn. 'ja' - Japanese): ").strip().lower()
         return (custom_code, custom_code)
     else:
-        print("Geçersiz seçim yapıldı, varsayılan olarak Almanca ('de') seçildi.")
-        return ("de", "Almanca")
+        print("Invalid selection made; defaulting to German ('de') seçildi.")
+        return ("de", "German")
 
-# 1. Dil seçimini al
+
 target_code, target_name = get_target_language()
 
-# 2. Ses kaydı alma
-duration = 5  # Kayıt süresi (saniye)
+
+duration = 5  
 sample_rate = 44100
 
-print("\n🎙️ Şimdi konuşun...")
+print("\n🎙️ Now Start Speaking...")
 recording = sd.rec(
     int(duration * sample_rate),
     samplerate=sample_rate,
@@ -47,29 +47,28 @@ recording = sd.rec(
     dtype="int16"
 )
 sd.wait()
-print("Kayıt tamamlandı.")
+print("Recording is finished.")
 
 wav.write("output.wav", sample_rate, recording)
 
-# 3. Ses dosyasını metne dönüştürme
+
 recognizer = sr.Recognizer()
 with sr.AudioFile("output.wav") as source:
     audio = recognizer.record(source)
 
 text = ""
 try:
-    # Konuşulan dili İngilizce ("en") olarak algılar, Türkçe için "tr-TR" yapabilirsiniz
     text = recognizer.recognize_google(audio, language="en")
-    print("🗣️ Algılanan Metin:", text)
+    print("🗣️ Detected text:", text)
 except sr.UnknownValueError:
-    print("Konuşma tanınamadı.")
+    print("Speech not recognized.")
 except sr.RequestError as e:
-    print(f"Hizmet hatası: {e}")
+    print(f"Service error: {e}")
 
-# 4. Seçilen dile çeviri yapma
+
 if text:
     translator = Translator()
     translated = translator.translate(text, dest=target_code)
-    print(f"🌍 {target_name} Çevirisi:", translated.text)
+    print(f"🌍 {target_name} Translation:", translated.text)
 
 
